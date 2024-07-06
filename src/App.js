@@ -93,7 +93,9 @@ export default function App() {
     },
     [query]
   );
-
+  function handleSelectedMovie(id) {
+    setSelectedId((selectedId) => (selectedId === id ? null : id));
+  }
   return (
     <>
       <NavBar>
@@ -108,13 +110,16 @@ export default function App() {
           ) : error ? (
             <ErrorMessage err={error} />
           ) : (
-            <MovieList movies={movies} onSelectMovie={setSelectedId} />
+            <MovieList movies={movies} onSelectMovie={handleSelectedMovie} />
           )}
         </Box>
 
         <Box>
           {selectedId ? (
-            <MovieDetails selectedId={selectedId} />
+            <MovieDetails
+              selectedId={selectedId}
+              onBackClick={() => setSelectedId(null)}
+            />
           ) : (
             <>
               <WatchedSummary watched={watched} />
@@ -126,8 +131,15 @@ export default function App() {
     </>
   );
 }
-function MovieDetails({ selectedId }) {
-  return <div>{selectedId}</div>;
+function MovieDetails({ selectedId, onBackClick }) {
+  return (
+    <div>
+      <button className="btn-back" onClick={onBackClick}>
+        &larr;
+      </button>
+      {selectedId}
+    </div>
+  );
 }
 function ErrorMessage({ err }) {
   return <p className="error">{err}</p>;

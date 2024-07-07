@@ -132,15 +132,51 @@ export default function App() {
   );
 }
 function MovieDetails({ selectedId, onBackClick }) {
+  const [movie, setMovie] = useState({});
+  useEffect(
+    function () {
+      async function getMovieByID() {
+        const res = await fetch(
+          `http://www.omdbapi.com/?apikey=${KEY}&i=${selectedId}`
+        );
+        const data = await res.json();
+        console.log(data);
+        setMovie(data);
+      }
+      getMovieByID();
+    },
+    [selectedId]
+  );
   return (
-    <div>
-      <button className="btn-back" onClick={onBackClick}>
-        &larr;
-      </button>
-      {selectedId}
+    <div className="details">
+      <header>
+        <button className="btn-back" onClick={onBackClick}>
+          &larr;
+        </button>
+        <img src={movie.Poster} alt={`Poster of ${movie.Poster} movie`} />
+        <div className="details-overview">
+          <h2>{movie.Title}</h2>
+          <p>
+            {movie.Released}&bull;{movie.Runtime}
+          </p>
+          <p>{movie.genre}</p>
+          <p>
+            <span>⭐</span>
+            {movie.imdbRating} IMDb rating
+          </p>
+        </div>
+      </header>
+      <section>
+        <p>
+          <em>{movie.Plot}</em>
+        </p>
+        <p>Starring {movie.Actors}</p>
+        <p>Directed By {movie.Director}</p>
+      </section>
     </div>
   );
 }
+
 function ErrorMessage({ err }) {
   return <p className="error">{err}</p>;
 }

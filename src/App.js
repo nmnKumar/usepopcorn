@@ -7,11 +7,12 @@ const KEY = "3a2b28f6";
 export default function App() {
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
-  const [query, setQuery] = useState("harry");
+  const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState(null);
 
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const controller = new AbortController();
   useEffect(
     function () {
       async function getMovies() {
@@ -19,7 +20,8 @@ export default function App() {
         try {
           setError("");
           const res = await fetch(
-            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
+            { signal: controller.signal }
           );
           if (!res.ok)
             throw new Error("Something went wrong with fetching movies");
@@ -29,7 +31,7 @@ export default function App() {
             throw new Error("No Movies found with this name");
           }
           setMovies(data.Search);
-          console.log(data.Search);
+          setError("");
         } catch (err) {
           setError(err.message);
         } finally {
@@ -42,6 +44,9 @@ export default function App() {
         return;
       }
       getMovies();
+      return function () {
+        controller.abort();
+      };
     },
     [query]
   );
@@ -108,15 +113,30 @@ function MovieDetails({ selectedId, onBackClick, onAddWatch, watchedMovies }) {
           `http://www.omdbapi.com/?apikey=${KEY}&i=${selectedId}`
         );
         const data = await res.json();
-        console.log(data);
+
         setMovie(data);
         setIsLoading(false);
         document.title = `Movie | ${data.Title}`;
       }
       getMovieByID();
       setIsWatched(watchedMovies.findIndex((x) => x.imdbID === selectedId));
+      return function () {
+        document.title = "usePopcorn";
+      };
     },
     [selectedId]
+  );
+  useEffect(
+    function () {
+      function callback(e) {
+        if (e.code === "Escape") onBackClick();
+      }
+      document.addEventListener("keydown", callback);
+      return function () {
+        document.removeEventListener("keydown", callback);
+      };
+    },
+    [onBackClick]
   );
   function handleAdd() {
     const newWatchedMovie = {

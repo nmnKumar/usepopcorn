@@ -1,6 +1,7 @@
 # usePopcorn
 
 usePopcorn is a movie search and rating application built with React. It allows users to search for movies, view details, rate movies, and keep track of watched movies.
+## URL - https://nmnkumar.github.io/usepopcorn/
 
 ## Features
 
